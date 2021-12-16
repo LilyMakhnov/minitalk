@@ -1,40 +1,64 @@
-CLIENT = client
-SERVER = server
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: esivre <marvin@42.fr>                      +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2021/10/27 16:19:19 by esivre            #+#    #+#              #
+#    Updated: 2021/11/10 20:52:43 by esivre           ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
 
-CLIENT_SRC = client.c 
-SERVER_SRC = server.c
-CLIENT_SRC_BONUS = client_bonus.c 
-SERVER_SRC_BONUS = server_bonus.c 
+NAME_CLIENT = client
+NAME_SERVER = server
 
-CC = gcc
-CFLAGS = -Wall -Wextra -Werror
-RM = rm -rf
+SRCS_CLIENT	=	client.c
+SRCS_SERVER	=	server.c 
 
-CLIENT_OBJ = $(CLIENT_SRC:.c=.o)
-SERVER_OBJ = $(SERVER_SRC:.c=.o)
-CLIENT_OBJ_BONUS = $(CLIENT_SRC_BONUS:.c=.o)
-SERVER_OBJ_BONUS = $(SERVER_SRC_BONUS:.c=.o)
 
-all : $(CLIENT) $(SERVER)
+SRCS_CLIENT_BONUS	=	client_bonus.c 
+SRCS_SERVER_BONUS	=	server_bonus.c 
 
-$(CLIENT) : $(CLIENT_OBJ)
-	@$(CC) $(CFLAGS) -o $(CLIENT) $(CLIENT_OBJ)
 
-$(SERVER) : $(SERVER_OBJ)
-	@$(CC) $(CFLAGS) -o $(SERVER) $(SERVER_OBJ)
+OBJS_CLIENT	=	$(SRCS_CLIENT:.c=.o)
+OBJS_SERVER	=	$(SRCS_SERVER:.c=.o)
 
-bonus : $(CLIENT_OBJ_BONUS) $(SERVER_OBJ_BONUS)
-	@$(CC) $(CFLAGS) -o $(CLIENT) $(CLIENT_OBJ_BONUS)
-	@$(CC) $(CFLAGS) -o $(SERVER) $(SERVER_OBJ_BONUS)
+OBJS_CLIENT_BONUS	=	$(SRCS_CLIENT_BONUS:.c=.o)
+OBJS_SERVER_BONUS	=	$(SRCS_SERVER_BONUS:.c=.o)
+
+
+FLAGS		=	-Wall -Wextra -Werror
+
+LIBFT       =   libft/libft.a
+
+.c.o:
+		gcc ${FLAGS} -c $< -o ${<:.c=.o}
+
+
+all:			$(LIBFT) $(NAME_SERVER) $(NAME_CLIENT)
+
+bonus:			$(LIBFT) $(OBJS_SERVER_BONUS) $(OBJS_CLIENT_BONUS)
+				gcc $(FLAGS) -o $(NAME_SERVER) $(OBJS_SERVER_BONUS) $(LIBFT)
+				gcc $(FLAGS) -o $(NAME_CLIENT) $(OBJS_CLIENT_BONUS) $(LIBFT)
+
+$(LIBFT):		
+			make bonus -C libft
+
+$(NAME_SERVER):		$(OBJS_SERVER)
+			gcc $(FLAGS) -o $(NAME_SERVER) $(OBJS_SERVER) $(LIBFT) 
+
+$(NAME_CLIENT):		$(OBJS_CLIENT)
+			gcc $(FLAGS) -o $(NAME_CLIENT) $(OBJS_CLIENT) $(LIBFT)
 
 clean:
-	@$(RM) $(CLIENT_OBJ) $(CLIENT_OBJ_BONUS)
-	@$(RM) $(SERVER_OBJ) $(SERVER_OBJ_BONUS)
+			/bin/rm -f $(OBJS_SERVER) $(OBJS_CLIENT) $(OBJS_SERVER_BONUS) $(OBJS_CLIENT_BONUS)
+			make -C ./libft clean
 
-fclean: clean
-	@$(RM) $(CLIENT)
-	@$(RM) $(SERVER)
+fclean:			clean
+			/bin/rm -f $(NAME_SERVER) $(NAME_CLIENT)
+			make -C ./libft/ fclean
 
-re: fclean all
+re:			fclean all
 
-.PHONY: all clean fclean re bonus
+.PHONY:		all clean fclean re
